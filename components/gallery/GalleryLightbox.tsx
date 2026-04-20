@@ -4,7 +4,6 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect } from "react";
 import type { GalleryItem } from "@/data/gallery";
-import { SITE } from "@/data/site";
 import { cn } from "@/lib/cn";
 
 type Props = {
@@ -15,7 +14,8 @@ type Props = {
 };
 
 /**
- * Minimal custom lightbox: overlay, image, caption + date/location.
+ * Minimal custom lightbox: overlay, image, navigation controls only.
+ *   - No caption, date or location is rendered — image stands alone.
  *   - Esc closes, arrows navigate.
  *   - Click on the dimmed backdrop closes.
  *   - Body scroll is locked while open.
@@ -75,13 +75,13 @@ export function GalleryLightbox({
             className="absolute inset-0 bg-ink/70 backdrop-blur-sm"
           />
 
-          <motion.figure
+          <motion.div
             key={active.id}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 flex max-h-[90vh] w-[min(92vw,1100px)] flex-col overflow-hidden rounded-3xl bg-cream-50 shadow-soft"
+            className="relative z-10 w-[min(92vw,1100px)] overflow-hidden rounded-3xl bg-cream-50 shadow-soft"
           >
             <div className="relative aspect-[4/3] w-full bg-beige-100">
               <Image
@@ -94,19 +94,6 @@ export function GalleryLightbox({
               />
             </div>
 
-            <figcaption className="flex flex-col gap-2 px-6 py-5 sm:px-8">
-              {active.caption ? (
-                <p className="font-serif text-xl italic leading-snug text-ink">
-                  {active.caption}
-                </p>
-              ) : null}
-              <p className="text-[11px] uppercase tracking-wider2 text-ink-muted">
-                {[active.date ?? SITE.gallery.noDateLabel, active.location]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            </figcaption>
-
             <NavButton side="left" onClick={() => go(-1)} />
             <NavButton side="right" onClick={() => go(1)} />
 
@@ -118,7 +105,7 @@ export function GalleryLightbox({
             >
               <CloseIcon />
             </button>
-          </motion.figure>
+          </motion.div>
         </motion.div>
       ) : null}
     </AnimatePresence>

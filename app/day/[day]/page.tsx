@@ -96,7 +96,7 @@ export default function DayPage({ params }: { params: Params }) {
             </h1>
           </header>
 
-          {/* Photo — editorial style: wide image, tight caption line, date-ish eyebrow. */}
+          {/* Photo — standalone visual block. Alt text stays for a11y. */}
           <figure className="mt-12 overflow-hidden rounded-3xl bg-beige-100 shadow-card">
             <div className="relative aspect-[4/3] w-full">
               <Image
@@ -108,14 +108,6 @@ export default function DayPage({ params }: { params: Params }) {
                 className="object-cover"
               />
             </div>
-            <figcaption className="flex flex-col gap-1 px-6 py-5 text-center">
-              <span className="text-[10px] uppercase tracking-wider2 text-ink-muted">
-                {SITE.day.memoryLabel}
-              </span>
-              <p className="font-serif text-lg italic text-ink-soft">
-                {d.memory}
-              </p>
-            </figcaption>
           </figure>
 
           {/* Message — the main letter of the day. */}

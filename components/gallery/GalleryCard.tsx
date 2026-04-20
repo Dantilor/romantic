@@ -12,8 +12,9 @@ type Props = {
 };
 
 /**
- * Single photo card in the masonry grid. Clicking opens the lightbox.
- * Captions and dates are rendered below the image in an editorial style.
+ * Single photo card in the masonry grid. Pure visual tile — no caption
+ * or metadata is shown in the UI; clicking opens the lightbox. Caption
+ * fields in the data layer are intentionally kept but not rendered.
  */
 export function GalleryCard({ item, index, onOpen }: Props) {
   const isPortrait = item.orientation !== "landscape";
@@ -36,7 +37,7 @@ export function GalleryCard({ item, index, onOpen }: Props) {
         onClick={onOpen}
         aria-label={`Открыть фото: ${item.alt}`}
         className={cn(
-          "group relative block w-full overflow-hidden rounded-t-2xl",
+          "group relative block w-full overflow-hidden rounded-2xl",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60",
         )}
       >
@@ -54,20 +55,6 @@ export function GalleryCard({ item, index, onOpen }: Props) {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         />
       </button>
-      {(item.caption || item.date || item.location) && (
-        <figcaption className="flex flex-col gap-1 px-4 py-3">
-          {item.caption ? (
-            <p className="text-sm italic leading-snug text-ink-soft">
-              {item.caption}
-            </p>
-          ) : null}
-          {(item.date || item.location) && (
-            <p className="text-[11px] uppercase tracking-wider2 text-ink-muted">
-              {[item.date, item.location].filter(Boolean).join(" · ")}
-            </p>
-          )}
-        </figcaption>
-      )}
     </motion.figure>
   );
 }
