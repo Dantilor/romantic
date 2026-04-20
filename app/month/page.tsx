@@ -6,18 +6,23 @@ import { ProgressSummary } from "@/components/ui/ProgressSummary";
 import { MonthGrid } from "@/components/month/MonthGrid";
 import { DAYS, TOTAL_DAYS } from "@/data/days";
 import { SITE, formatSite } from "@/data/site";
-import { isDayUnlocked, unlockedCount } from "@/lib/unlock";
+import {
+  isDayUnlockedFromUserStart,
+  unlockedCountFromUserStart,
+} from "@/lib/unlock";
+import { getUserStartDate } from "@/lib/unlock.server";
 
 export const metadata: Metadata = {
   title: `${SITE.month.title} · ${SITE.brand.title}`,
 };
 
 export default function MonthPage() {
-  const unlocked = unlockedCount();
+  const startedAt = getUserStartDate();
+  const unlocked = unlockedCountFromUserStart(startedAt);
   const days = DAYS.map((d) => ({
     day: d.day,
     title: d.title,
-    unlocked: isDayUnlocked(d.day),
+    unlocked: isDayUnlockedFromUserStart(d.day, startedAt),
   }));
 
   return (

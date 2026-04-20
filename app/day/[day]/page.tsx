@@ -9,16 +9,19 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { DayProgressTracker } from "@/components/day/DayProgressTracker";
 import { WeeklyMomentCard } from "@/components/day/WeeklyMomentCard";
 import { MOOD } from "@/components/day/mood";
-import { DAYS, TOTAL_DAYS, getDay } from "@/data/days";
+import { TOTAL_DAYS, getDay } from "@/data/days";
 import { SITE, formatSite } from "@/data/site";
-import { isDayUnlocked } from "@/lib/unlock";
+import { isDayUnlockedFromUserStart } from "@/lib/unlock";
+import { getUserStartDate } from "@/lib/unlock.server";
 import { cn } from "@/lib/cn";
 
 type Params = { day: string };
 
-export function generateStaticParams(): Params[] {
-  return DAYS.map((d) => ({ day: String(d.day) }));
-}
+// Per-user unlock depends on the `rs_started_at` cookie, so each day page
+// is rendered per request. We deliberately omit `generateStaticParams`
+// (which would opt the segment into SSG) — invalid day slugs like
+// `/day/99` still 404 cleanly via `notFound()` below.
+export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
   const n = Number(params.day);
@@ -32,7 +35,8 @@ export default function DayPage({ params }: { params: Params }) {
   const d = getDay(n);
   if (!d) notFound();
 
-  const unlocked = isDayUnlocked(d.day);
+  const startedAt = getUserStartDate();
+  const unlocked = isDayUnlockedFromUserStart(d.day, startedAt);
   const prev = d.day > 1 ? d.day - 1 : null;
   const next = d.day < TOTAL_DAYS ? d.day + 1 : null;
 

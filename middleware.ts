@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { START_COOKIE, START_COOKIE_MAX_AGE_SECONDS } from "@/lib/unlock";
 
 /**
  * Two-layer gate:
@@ -14,8 +15,12 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
  *             `rs_session` cookie must be valid. `/login` is reachable from
  *             either the prefixed or bare path.
  *
- * This lets us keep a single set of routes (no page duplication) while
- * supporting a shareable secret URL like `/our-little-month/month`.
+ * On top of that, every authenticated request also ensures that the
+ * `rs_started_at` cookie exists. Normally it is set by `/api/login` on the
+ * first successful password check; this middleware branch only fires as a
+ * safety net for sessions created before this feature existed, or for any
+ * exotic flow that skipped the login route. It never overwrites an
+ * existing value.
  */
 
 const ACCESS_COOKIE = "rs_access";
@@ -39,6 +44,39 @@ function setAccessCookie(res: NextResponse): void {
     path: "/",
     maxAge: ACCESS_MAX_AGE_SECONDS,
   });
+}
+
+function setStartCookie(res: NextResponse, iso: string): void {
+  res.cookies.set({
+    name: START_COOKIE,
+    value: iso,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: START_COOKIE_MAX_AGE_SECONDS,
+  });
+}
+
+/**
+ * Build a fresh `Headers` copy of the incoming request, optionally injecting
+ * `rs_started_at=<iso>` into the `Cookie` header so downstream route
+ * handlers see the seeded value on the current request (not just on the
+ * next one, which is what the response `Set-Cookie` alone would guarantee).
+ */
+function buildForwardedHeaders(
+  req: NextRequest,
+  seededStart: string | null,
+): Headers {
+  const headers = new Headers(req.headers);
+  if (!seededStart) return headers;
+  const prev = headers.get("cookie") ?? "";
+  const glue = prev.length > 0 ? "; " : "";
+  headers.set(
+    "cookie",
+    `${prev}${glue}${START_COOKIE}=${encodeURIComponent(seededStart)}`,
+  );
+  return headers;
 }
 
 function notFound(): NextResponse {
@@ -69,6 +107,12 @@ export async function middleware(req: NextRequest) {
   const sessionToken = req.cookies.get(SESSION_COOKIE)?.value;
   const authed = await verifySessionToken(sessionToken);
 
+  // Only ever seed the start timestamp for an authenticated user who
+  // somehow lacks it. `/api/login` is excluded from this middleware, so
+  // the usual first-login path still owns primary seeding.
+  const missingStart = authed && !req.cookies.get(START_COOKIE)?.value;
+  const seededStart = missingStart ? new Date().toISOString() : null;
+
   // The login page: always reachable (once past the secret gate).
   if (effectivePath === "/login") {
     if (authed) {
@@ -77,6 +121,7 @@ export async function middleware(req: NextRequest) {
       url.search = "";
       const res = NextResponse.redirect(url);
       if (justGranted) setAccessCookie(res);
+      if (seededStart) setStartCookie(res, seededStart);
       return res;
     }
 
@@ -107,12 +152,19 @@ export async function middleware(req: NextRequest) {
   if (isSecretEntry && secretPrefix) {
     const rewriteUrl = req.nextUrl.clone();
     rewriteUrl.pathname = effectivePath;
-    const res = NextResponse.rewrite(rewriteUrl);
+    const res = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: buildForwardedHeaders(req, seededStart) },
+    });
     if (justGranted) setAccessCookie(res);
+    if (seededStart) setStartCookie(res, seededStart);
     return res;
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next({
+    request: { headers: buildForwardedHeaders(req, seededStart) },
+  });
+  if (seededStart) setStartCookie(res, seededStart);
+  return res;
 }
 
 export const config = {

@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/Button";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { TOTAL_DAYS } from "@/data/days";
 import { SITE, formatSite, type SitePreviewCard } from "@/data/site";
-import { unlockedCount } from "@/lib/unlock";
+import { unlockedCountFromUserStart } from "@/lib/unlock";
+import { getUserStartDate } from "@/lib/unlock.server";
 
 export default function HomePage() {
-  const unlocked = unlockedCount();
+  const startedAt = getUserStartDate();
+  const unlocked = unlockedCountFromUserStart(startedAt);
 
   return (
     <PageTransition>
