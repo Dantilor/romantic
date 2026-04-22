@@ -15,6 +15,12 @@
 export type DayMood = "soft" | "playful" | "nostalgic" | "intimate";
 export type DayType = "message" | "memory" | "special";
 
+/** Optional second letter on a day page. Paragraphs in `body` are separated by blank lines (`\n\n`). */
+export type DayExtraSection = {
+  title: string;
+  body: string;
+};
+
 export type Day = {
   day: number;
   /** Short headline of the day (appears as <h1> on the day page). */
@@ -35,6 +41,8 @@ export type Day = {
   optionalQuote?: string;
   /** Optional open question for her to sit with — shown last, very softly. */
   optionalPrompt?: string;
+  /** Optional extra block (title + letter) after the main `message`. Rare; day 3 uses it. */
+  extraSection?: DayExtraSection;
 };
 
 /** Плейсхолдеры из репозитория. Заменяй в `image` у нужных дней. */
@@ -92,6 +100,14 @@ const AUTHORED: Day[] = [
       "Какой наш момент тебе хочется пересматривать чаще всего?",
     image: "/photos/days/03.jpg",
     imageAlt: ALT,
+    extraSection: {
+      title: "Письмо для тебя",
+      body: `Моя любимая
+
+Я просто хочу сказать, как много ты для меня значишь. Каждый день с тобой это подарок, и я не могу представить свою жизнь без тебя. Ты наполняешь мои дни светом и радостью, и я так благодарен за твою любовь и поддержку.
+
+Ты моя сладкая булочка, и я надеюсь, что смогу сделать тебя такой же счастливой, как ты делаешь меня.`,
+    },
   },
   {
     day: 4,

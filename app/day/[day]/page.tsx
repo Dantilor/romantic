@@ -9,7 +9,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { DayProgressTracker } from "@/components/day/DayProgressTracker";
 import { WeeklyMomentCard } from "@/components/day/WeeklyMomentCard";
 import { MOOD } from "@/components/day/mood";
-import { TOTAL_DAYS, getDay } from "@/data/days";
+import { TOTAL_DAYS, getDay, type DayExtraSection } from "@/data/days";
 import { SITE, formatSite } from "@/data/site";
 import { isDayUnlockedFromUserStart } from "@/lib/unlock";
 import { getUserStartDate } from "@/lib/unlock.server";
@@ -117,6 +117,10 @@ export default function DayPage({ params }: { params: Params }) {
             </p>
           </div>
 
+          {d.extraSection ? (
+            <DayExtraLetter section={d.extraSection} />
+          ) : null}
+
           {/* Optional pulled quote — quiet editorial aside. */}
           {d.optionalQuote ? (
             <blockquote
@@ -176,5 +180,43 @@ export default function DayPage({ params }: { params: Params }) {
         </Container>
       </article>
     </PageTransition>
+  );
+}
+
+function DayExtraLetter({ section }: { section: DayExtraSection }) {
+  const paragraphs = section.body
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  return (
+    <section
+      aria-labelledby="day-extra-letter-title"
+      className="mx-auto mt-16 max-w-2xl"
+    >
+      <h2
+        id="day-extra-letter-title"
+        className="text-center font-serif text-3xl leading-tight text-ink sm:text-[2rem]"
+      >
+        {section.title}
+      </h2>
+      <div className="mt-8 rounded-3xl border border-ink/5 bg-cream-50/70 px-7 py-8 shadow-card sm:px-10 sm:py-9">
+        <div className="flex flex-col gap-6">
+          {paragraphs.map((para, i) => (
+            <p
+              key={i}
+              className={cn(
+                "font-serif leading-[1.65] text-ink-soft",
+                i === 0
+                  ? "text-lg text-ink sm:text-xl"
+                  : "text-base sm:text-[17px]",
+              )}
+            >
+              {para}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
