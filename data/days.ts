@@ -21,6 +21,22 @@ export type DayExtraSection = {
   body: string;
 };
 
+/** Warm mini-quest on a day page — local state only, no progress integration. */
+export type DayExtraQuizQuestion = {
+  id: string;
+  question: string;
+  options: string[];
+};
+
+export type DayExtraQuizSection = {
+  title: string;
+  /** Intro copy; use `\n\n` between paragraphs. */
+  intro: string;
+  questions: DayExtraQuizQuestion[];
+  /** Shown after all questions are answered; use `\n` for soft line breaks. */
+  finalText: string;
+};
+
 export type Day = {
   day: number;
   /** Short headline of the day (appears as <h1> on the day page). */
@@ -43,6 +59,8 @@ export type Day = {
   optionalPrompt?: string;
   /** Optional extra block (title + letter) after the main `message`. Rare; day 3 uses it. */
   extraSection?: DayExtraSection;
+  /** Optional interactive mini-quest after `message` / `extraSection`. Day 4 uses it. */
+  extraQuizSection?: DayExtraQuizSection;
 };
 
 /** Плейсхолдеры из репозитория. Заменяй в `image` у нужных дней. */
@@ -119,6 +137,85 @@ const AUTHORED: Day[] = [
     memory: "[какая-то маленькая привычка, которую ты в ней любишь]",
     image: "/photos/days/04.jpg",
     imageAlt: ALT,
+    extraQuizSection: {
+      title: "Маленький квест для тебя",
+      intro:
+        "Хочу сегодня не просто оставить тебе сообщение, а предложить маленькую игру.\n\nНичего сложного — всего несколько вопросов про нас, про тебя и про те мелочи, которые я особенно люблю.",
+      questions: [
+        {
+          id: "q1",
+          question: "Что я замечаю в тебе чаще всего?",
+          options: [
+            "Твой взгляд",
+            "Твой смех",
+            "То, как ты вредничаешь",
+            "Всё сразу",
+          ],
+        },
+        {
+          id: "q2",
+          question: "Какой наш формат счастья мне особенно нравится?",
+          options: [
+            "Когда мы просто рядом и никуда не спешим",
+            "Спонтанные поездки",
+            "Красивые выходы куда-то",
+            "Любой, если ты рядом",
+          ],
+        },
+        {
+          id: "q3",
+          question: "Что в тебе для меня самое особенное?",
+          options: [
+            "Твоя нежность",
+            "Твоя искренность",
+            "Твои мелочи",
+            "Всё вместе",
+          ],
+        },
+        {
+          id: "q4",
+          question: "Какой момент между нами я люблю особенно?",
+          options: [
+            "Когда мы смеёмся до слёз",
+            "Когда просто молчим рядом",
+            "Когда ты смотришь на меня по-особенному",
+            "Все эти моменты",
+          ],
+        },
+        {
+          id: "q5",
+          question: "Что делает тебя именно тобой для меня?",
+          options: [
+            "Твоя энергия",
+            "Твои привычки и мелочи",
+            "Твоя теплота",
+            "Всё сразу",
+          ],
+        },
+        {
+          id: "q6",
+          question: "Что мне хочется делать для тебя чаще?",
+          options: [
+            "Радовать тебя",
+            "Обнимать тебя",
+            "Удивлять тебя",
+            "Всё вместе",
+          ],
+        },
+        {
+          id: "q7",
+          question: "Какой ответ у этого квеста на самом деле правильный?",
+          options: [
+            "Первый",
+            "Второй",
+            "Третий",
+            "Только один: мне нравится в тебе всё",
+          ],
+        },
+      ],
+      finalText:
+        "Если честно, правильный ответ у меня только один:\nмне в тебе нравится всё.\n\nНо особенно — те маленькие детали, из которых складываешься именно ты.",
+    },
   },
   {
     day: 5,

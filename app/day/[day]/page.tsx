@@ -7,6 +7,7 @@ import { Divider } from "@/components/ui/Divider";
 import { Button } from "@/components/ui/Button";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { DayProgressTracker } from "@/components/day/DayProgressTracker";
+import { DayMiniQuest } from "@/components/day/DayMiniQuest";
 import { WeeklyMomentCard } from "@/components/day/WeeklyMomentCard";
 import { MOOD } from "@/components/day/mood";
 import { TOTAL_DAYS, getDay, type DayExtraSection } from "@/data/days";
@@ -119,6 +120,10 @@ export default function DayPage({ params }: { params: Params }) {
 
           {d.extraSection ? (
             <DayExtraLetter section={d.extraSection} />
+          ) : null}
+
+          {d.extraQuizSection ? (
+            <DayMiniQuest section={d.extraQuizSection} />
           ) : null}
 
           {/* Optional pulled quote — quiet editorial aside. */}
